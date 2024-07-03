@@ -47,8 +47,9 @@ type group[K comparable, V any] struct {
 const (
 	h1Mask    uint64 = 0xffff_ffff_ffff_ff80
 	h2Mask    uint64 = 0x0000_0000_0000_007f
-	empty     uint8  = 0b1000_0000
-	tombstone uint8  = 0b1111_1110
+	h2Offset         = 2
+	empty     uint8  = 0b0000_0000
+	tombstone uint8  = 0b0000_0001
 )
 
 // h1 is a 57 bit hash prefix
@@ -65,9 +66,6 @@ func NewMap[K comparable, V any](sz uint32) (m *Map[K, V]) {
 		groups: make([]group[K, V], groups),
 		hash:   maphash.NewHasher[K](),
 		limit:  groups * maxAvgGroupLoad,
-	}
-	for i := range m.ctrl {
-		m.ctrl[i] = newEmptyMetadata()
 	}
 	return
 }
@@ -236,10 +234,8 @@ func (m *Map[K, V]) Iter(cb func(k K, v V) (stop bool)) {
 
 // Clear removes all elements from the Map.
 func (m *Map[K, V]) Clear() {
-	for i, c := range m.ctrl {
-		for j := range c {
-			m.ctrl[i][j] = empty
-		}
+	for i := range m.ctrl {
+		m.ctrl[i] = metadata{}
 	}
 	var k K
 	var v V
@@ -302,9 +298,6 @@ func (m *Map[K, V]) rehash(n uint32) {
 	groups, ctrl := m.groups, m.ctrl
 	m.groups = make([]group[K, V], n)
 	m.ctrl = make([]metadata, n)
-	for i := range m.ctrl {
-		m.ctrl[i] = newEmptyMetadata()
-	}
 	m.hash = maphash.NewSeed(m.hash)
 	m.limit = n * maxAvgGroupLoad
 	m.resident, m.dead = 0, 0
@@ -333,15 +326,11 @@ func numGroups(n uint32) (groups uint32) {
 	return
 }
 
-func newEmptyMetadata() (meta metadata) {
-	for i := range meta {
-		meta[i] = empty
-	}
-	return
-}
-
+// splitHash extracts the h1 and h2 components from a 64 bit hash.
+// h1 is the upper 57 bits, h2 is the lower 7 bits plus two.
+// By adding 2, it ensures that h2 is never uint8(0) or uint8(1).
 func splitHash(h uint64) (h1, h2) {
-	return h1((h & h1Mask) >> 7), h2(h & h2Mask)
+	return h1((h & h1Mask) >> 7), h2(h&h2Mask) + h2Offset
 }
 
 func probeStart(hi h1, groups int) uint32 {

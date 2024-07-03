@@ -26,37 +26,40 @@ import (
 func TestMatchMetadata(t *testing.T) {
 	var meta metadata
 	for i := range meta {
-		meta[i] = uint8(i)
+		meta[i] = uint8(i) + h2Offset
 	}
 	t.Run("metaMatchH2", func(t *testing.T) {
-		for _, x := range meta {
-			mask := metaMatchH2(&meta, h2(x))
+		for i, m := range meta {
+			mask := metaMatchH2(&meta, h2(m))
 			assert.NotZero(t, mask)
-			assert.Equal(t, uint32(x), nextMatch(&mask))
+			assert.Equal(t, uint32(i), nextMatch(&mask))
 		}
 	})
 	t.Run("metaMatchEmpty", func(t *testing.T) {
 		mask := metaMatchEmpty(&meta)
 		assert.Equal(t, mask, bitset(0))
+
 		for i := range meta {
 			meta[i] = empty
 			mask = metaMatchEmpty(&meta)
 			assert.NotZero(t, mask)
 			assert.Equal(t, uint32(i), nextMatch(&mask))
-			meta[i] = uint8(i)
+			meta[i] = uint8(i) + h2Offset
 		}
 	})
 	t.Run("nextMatch", func(t *testing.T) {
+		const needle = uint8(42) + h2Offset
+
 		// test iterating multiple matches
-		meta = newEmptyMetadata()
+		meta = metadata{}
 		mask := metaMatchEmpty(&meta)
 		for i := range meta {
 			assert.Equal(t, uint32(i), nextMatch(&mask))
 		}
 		for i := 0; i < len(meta); i += 2 {
-			meta[i] = uint8(42)
+			meta[i] = needle
 		}
-		mask = metaMatchH2(&meta, h2(42))
+		mask = metaMatchH2(&meta, h2(needle))
 		for i := 0; i < len(meta); i += 2 {
 			assert.Equal(t, uint32(i), nextMatch(&mask))
 		}
@@ -90,10 +93,10 @@ func nextPow2(x uint32) uint32 {
 }
 
 func TestConstants(t *testing.T) {
-	assert.Equal(t, byte(0b1000_0000), empty)
-	assert.Equal(t, byte(0b1000_0000), reinterpretCast(empty))
-	assert.Equal(t, byte(0b1111_1110), tombstone)
-	assert.Equal(t, byte(0b1111_1110), reinterpretCast(tombstone))
+	assert.Equal(t, byte(0b0000_0000), empty)
+	assert.Equal(t, byte(0b0000_0000), reinterpretCast(empty))
+	assert.Equal(t, byte(0b0000_0001), tombstone)
+	assert.Equal(t, byte(0b0000_0001), reinterpretCast(tombstone))
 }
 
 func reinterpretCast(i uint8) byte {
