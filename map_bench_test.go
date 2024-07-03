@@ -54,6 +54,34 @@ func BenchmarkInt64Maps(b *testing.B) {
 	}
 }
 
+func BenchmarkNewMap(b *testing.B) {
+	sizes := []int{16, 128, 1024, 8192, 131072}
+	for _, n := range sizes {
+		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				m := NewMap[int, int](uint32(n))
+				m.Count()
+			}
+		})
+	}
+}
+
+func BenchmarkMap_Put_Growing(b *testing.B) {
+	sizes := []int{16, 128, 1024, 8192, 131072}
+	for _, n := range sizes {
+		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
+			data := generateInt64Data(n)
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				m := NewMap[int64, int64](uint32(n))
+				for _, k := range data {
+					m.Put(k, k)
+				}
+			}
+		})
+	}
+}
+
 func TestMemoryFootprint(t *testing.T) {
 	t.Skip("unskip for memory footprint stats")
 	var samples []float64
