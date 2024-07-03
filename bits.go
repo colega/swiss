@@ -37,7 +37,7 @@ func metaMatchH2(m *metadata, h h2) bitset {
 }
 
 func metaMatchEmpty(m *metadata) bitset {
-	return hasZeroByte(castUint64(m) ^ hiBits)
+	return hasZeroByte(castUint64(m))
 }
 
 func nextMatch(b *bitset) uint32 {
