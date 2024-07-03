@@ -36,7 +36,7 @@ type Map[K comparable, V any] struct {
 // metadata is the h2 metadata array for a group.
 // find operations first probe the controls bytes
 // to filter candidates before matching keys
-type metadata [groupSize]int8
+type metadata [groupSize]uint8
 
 // group is a group of 16 key-value pairs
 type group[K comparable, V any] struct {
@@ -47,15 +47,15 @@ type group[K comparable, V any] struct {
 const (
 	h1Mask    uint64 = 0xffff_ffff_ffff_ff80
 	h2Mask    uint64 = 0x0000_0000_0000_007f
-	empty     int8   = -128 // 0b1000_0000
-	tombstone int8   = -2   // 0b1111_1110
+	empty     uint8  = 0b1000_0000
+	tombstone uint8  = 0b1111_1110
 )
 
 // h1 is a 57 bit hash prefix
 type h1 uint64
 
 // h2 is a 7 bit hash suffix
-type h2 int8
+type h2 uint8
 
 // NewMap constructs a Map.
 func NewMap[K comparable, V any](sz uint32) (m *Map[K, V]) {
@@ -150,7 +150,7 @@ func (m *Map[K, V]) Put(key K, value V) {
 			s := nextMatch(&matches)
 			m.groups[g].keys[s] = key
 			m.groups[g].values[s] = value
-			m.ctrl[g][s] = int8(lo)
+			m.ctrl[g][s] = uint8(lo)
 			m.resident++
 			return
 		}

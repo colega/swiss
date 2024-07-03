@@ -31,12 +31,12 @@ const (
 type bitset uint16
 
 func metaMatchH2(m *metadata, h h2) bitset {
-	b := simd.MatchMetadata((*[16]int8)(m), int8(h))
+	b := simd.MatchMetadata((*[groupSize]uint8)(m), uint8(h))
 	return bitset(b)
 }
 
 func metaMatchEmpty(m *metadata) bitset {
-	b := simd.MatchMetadata((*[16]int8)(m), empty)
+	b := simd.MatchMetadata((*[groupSize]uint8)(m), empty)
 	return bitset(b)
 }
 

@@ -26,7 +26,7 @@ import (
 func TestMatchMetadata(t *testing.T) {
 	var meta metadata
 	for i := range meta {
-		meta[i] = int8(i)
+		meta[i] = uint8(i)
 	}
 	t.Run("metaMatchH2", func(t *testing.T) {
 		for _, x := range meta {
@@ -43,7 +43,7 @@ func TestMatchMetadata(t *testing.T) {
 			mask = metaMatchEmpty(&meta)
 			assert.NotZero(t, mask)
 			assert.Equal(t, uint32(i), nextMatch(&mask))
-			meta[i] = int8(i)
+			meta[i] = uint8(i)
 		}
 	})
 	t.Run("nextMatch", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestMatchMetadata(t *testing.T) {
 			assert.Equal(t, uint32(i), nextMatch(&mask))
 		}
 		for i := 0; i < len(meta); i += 2 {
-			meta[i] = int8(42)
+			meta[i] = uint8(42)
 		}
 		mask = metaMatchH2(&meta, h2(42))
 		for i := 0; i < len(meta); i += 2 {
@@ -66,7 +66,7 @@ func TestMatchMetadata(t *testing.T) {
 func BenchmarkMatchMetadata(b *testing.B) {
 	var meta metadata
 	for i := range meta {
-		meta[i] = int8(i)
+		meta[i] = uint8(i)
 	}
 	var mask bitset
 	for i := 0; i < b.N; i++ {
@@ -90,14 +90,13 @@ func nextPow2(x uint32) uint32 {
 }
 
 func TestConstants(t *testing.T) {
-	c1, c2 := empty, tombstone
-	assert.Equal(t, byte(0b1000_0000), byte(c1))
-	assert.Equal(t, byte(0b1000_0000), reinterpretCast(c1))
-	assert.Equal(t, byte(0b1111_1110), byte(c2))
-	assert.Equal(t, byte(0b1111_1110), reinterpretCast(c2))
+	assert.Equal(t, byte(0b1000_0000), empty)
+	assert.Equal(t, byte(0b1000_0000), reinterpretCast(empty))
+	assert.Equal(t, byte(0b1111_1110), tombstone)
+	assert.Equal(t, byte(0b1111_1110), reinterpretCast(tombstone))
 }
 
-func reinterpretCast(i int8) byte {
+func reinterpretCast(i uint8) byte {
 	return *(*byte)(unsafe.Pointer(&i))
 }
 

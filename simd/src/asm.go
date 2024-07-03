@@ -23,7 +23,7 @@ import (
 func main() {
 	ConstraintExpr("amd64")
 
-	TEXT("MatchMetadata", NOSPLIT, "func(metadata *[16]int8, hash int8) uint16")
+	TEXT("MatchMetadata", NOSPLIT, "func(metadata *[16]uint8, hash uint8) uint16")
 	Doc("MatchMetadata performs a 16-way probe of |metadata| using SSE instructions",
 		"nb: |metadata| must be an aligned pointer")
 	m := Mem{Base: Load(Param("metadata"), GP64())}
