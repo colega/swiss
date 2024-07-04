@@ -17,3 +17,14 @@ TEXT ·MatchMetadata(SB), NOSPLIT, $0-18
 	PMOVMSKB X0, AX
 	MOVW     AX, ret+16(FP)
 	RET
+
+// func MatchEmpty(metadata *[16]uint8) uint16
+// Requires: SSE2
+TEXT ·MatchEmpty(SB), NOSPLIT, $0-10
+	MOVQ     metadata+0(FP), AX
+	PXOR     X0, X0
+	MOVOU    (AX), X1
+	PCMPEQB  X1, X0
+	PMOVMSKB X0, AX
+	MOVW     AX, ret+8(FP)
+	RET
