@@ -1,3 +1,4 @@
+//go:generate go run asm.go -pkg simd -out ../match.s -stubs ../match_amd64.go
 // Copyright 2023 Dolthub, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,9 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-//go:build ignore
-// +build ignore
 
 package main
 
