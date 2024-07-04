@@ -36,7 +36,7 @@ func metaMatchH2(m *metadata, h h2) bitset {
 }
 
 func metaMatchEmpty(m *metadata) bitset {
-	b := simd.MatchMetadata((*[groupSize]uint8)(m), empty)
+	b := simd.MatchEmpty((*[groupSize]uint8)(m))
 	return bitset(b)
 }
 
